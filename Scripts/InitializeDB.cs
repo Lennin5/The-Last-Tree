@@ -140,13 +140,14 @@ public class InitializeDB : MonoBehaviour
                 else
                 {
                     Debug.Log($"<color=yellow>[INFO] Table {tableName} already exists</color>");
+                    insertData = false;
                 }
 
                 reader.Close();
             }
 
-            if (insertData)
-            {
+            if (insertData) 
+            { 
                 // Call method to insert default data
                 Debug.Log("<color=yellow>[INFO] Inserting default data...</color>");
             }
