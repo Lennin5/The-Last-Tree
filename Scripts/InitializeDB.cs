@@ -86,156 +86,77 @@ public class InitializeDB : MonoBehaviour
     }
 
 
+
+
     private void CreateTables(string filePath, string deviceType)
     {
         // Open db connection
-        conn = "URI=file:" + filePath;
-        Debug.Log("<color=#00FF00>Establishing " + deviceType + " connection to: " + conn + "</color>");
-        dbconn = new SqliteConnection(conn);
-        dbconn.Open();
+        string connString = "URI=file:" + filePath;
+        Debug.Log("<color=#00FF00>Establishing " + deviceType + " connection to: " + connString + "</color>");
 
-        try
+        using (var dbconn = new SqliteConnection(connString))
         {
-            // Validate if tables already exist in the database
-            string[] tableNames = { "Users", "Badges", "Progress", "Achievements", "Levels" };
-            bool insertData = false;
+            dbconn.Open();
 
-            foreach (string tableName in tableNames)
-            {
-                string tableQuery = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}'";
-                dbcmd = dbconn.CreateCommand();
-                dbcmd.CommandText = tableQuery;
-                reader = dbcmd.ExecuteReader();
-
-                if (!reader.Read())
-                {
-                    // Table doesn't exist, create it
-                    reader.Close();
-                    string createTableQuery = "";
-
-                    switch (tableName)
-                    {
-                        case "Users":
-                            createTableQuery = "CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, language CHAR(2), current_level INT, completed_levels INT, completed_tutorial BOOLEAN, created_at TIMESTAMP)";
-                            break;
-                        case "Badges":
-                            createTableQuery = "CREATE TABLE IF NOT EXISTS Badges (id INTEGER PRIMARY KEY NOT NULL, name VARCHAR(50), description VARCHAR(50), image_path VARCHAR(30), created_at TIMESTAMP)";
-                            break;
-                        case "Progress":
-                            createTableQuery = "CREATE TABLE IF NOT EXISTS Progress (id INTEGER PRIMARY KEY NOT NULL, best_score INT, objects_avoided INT, created_at TIMESTAMP)";
-                            break;
-                        case "Achievements":
-                            createTableQuery = "CREATE TABLE IF NOT EXISTS Achievements (id INTEGER PRIMARY KEY NOT NULL, drops_needed_to_unlock INT, unlocked BOOLEAN, badge_id INT, position INT, created_at TIMESTAMP)";
-                            break;
-                        case "Levels":
-                            createTableQuery = "CREATE TABLE IF NOT EXISTS Levels (id INTEGER PRIMARY KEY NOT NULL, name VARCHAR(100), image_path VARCHAR(30), unlocked BOOLEAN, user_id INT, progress_id INT, achievements_id INT, created_at TIMESTAMP)";
-                            break;
-                    }
-
-                    dbcmd.CommandText = createTableQuery;
-                    reader = dbcmd.ExecuteReader();
-                    Debug.Log($"<color=cyan>Table {tableName} created successfully!</color>");
-                    insertData = true;
-                }
-                else
-                {
-                    Debug.Log($"<color=yellow>[INFO] Table {tableName} already exists</color>");
-                    insertData = false;
-                }
-
-                reader.Close();
-            }
-
-            if (insertData) 
-            { 
-                // Call method to insert default data
-                Debug.Log("<color=yellow>[INFO] Inserting default data...</color>");
-            }
-        }
-        catch (Exception e)
+            // Define table creation queries
+            var tableQueries = new List<string>
         {
-            Debug.Log("Error when creating tables: " + e.Message);
-        }
-        finally
-        {
-            dbconn.Close();
-            dbconn.Dispose();
-            Debug.Log("<color=" + limaColor + ">Closed connection to database!</color>");
-        }
-    }
-
-    private void InsertDefaultData()
-    {
-        string[] defaultData = {
-            "(10, 'Julio', 2023, '0.00', '3.00', '1.00', '4.00')",
-            "(11, 'Julio', 2023, '0.75', '3.00', '0.75', '4.50')",
-            "(12, 'Julio', 2023, '0.75', '3.00', '0.75', '4.50')",
-            "(13, 'Julio', '2023', '0.75', '2.50', '0.75', '4.00')",
-            "(14, 'Julio', '2023', '0.75', '3.00', '0.75', '4.50')",
-
-            "(17, 'Julio', '2023', '0.75', '2.50', '0.75', '4.00')",
-            "(18, 'Julio', '2023', '0.75', '3.00', '0.75', '4.50')",
-            "(19, 'Julio', '2023', '0.75', '2.50', '0.75', '4.00')",
-            "(20, 'Julio', '2023', '0.75', '2.50', '0.75', '4.00')",
-            "(21, 'Julio', '2023', '0.75', '2.75', '0.75', '4.25')",
-
-            "(24, 'Julio', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(25, 'Julio', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(26, 'Julio', '2023', '0.75', '0.25', '0.75', '1.75')",
-            "(27, 'Julio', '2023', '0.75', '1.25', '0.75', '2.75')",
-            "(28, 'Julio', '2023', '0.75', '5.50', '0.75', '7.00')",
-
-            "(7, 'Agosto', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(8, 'Agosto', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(9, 'Agosto', '2023', '0.75', '3.00', '0.75', '4.50')",
-            "(10, 'Agosto', '2023', '0.75', '4.00', '0.75', '5.50')",
-            "(11, 'Agosto', '2023', '0.75', '1.75', '0.75', '3.25')",
-
-            "(21, 'Agosto', '2023', '0.75', '0.25', '0.75', '1.75')",
-            "(22, 'Agosto', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(23, 'Agosto', '2023', '0.75', '0.25', '0.75', '1.75')",
-            "(24, 'Agosto', '2023', '0.75', '0.25', '0.75', '1.75')",
-            "(25, 'Agosto', '2023', '1.90', '3.25', '0.75', '5.90')",
-
-            "(28, 'Agosto', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(29, 'Agosto', '2023', '0.75', '0.50', '1.25', '2.50')",
-            "(30, 'Agosto', '2023', '0.75', '0.25', '0.75', '1.75')",
-            "(31, 'Agosto', '2023', '0.75', '5.25', '0.75', '6.75')",
-            "(1, 'Septiembre', '2023', '0.75', '5.00', '0.75', '6.50')",
-
-            "(4, 'Septiembre', '2023', '0.75', '0.00', '0.75', '1.50')",
-            "(5, 'Septiembre', '2023', '0.75', '1.25', '0.75', '2.75')",
-            "(6, 'Septiembre', '2023', '0.75', '0.25', '0.75', '1.75')",
-            "(7, 'Septiembre', '2023', '0.75', '0.75', '0.75', '2.25')",
-            "(8, 'Septiembre', '2023', '0.75', '6.75', '0.75', '8.25')"
+            "CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, language CHAR(2), current_level INT, completed_levels INT, completed_tutorial BOOLEAN, created_at TIMESTAMP)",
+            "CREATE TABLE IF NOT EXISTS Badges (id INTEGER PRIMARY KEY NOT NULL, name VARCHAR(50), description VARCHAR(50), image_path VARCHAR(30), created_at TIMESTAMP)",
+            "CREATE TABLE IF NOT EXISTS Progress (id INTEGER PRIMARY KEY NOT NULL, best_score INT, objects_avoided INT, created_at TIMESTAMP)",
+            "CREATE TABLE IF NOT EXISTS Achievements (id INTEGER PRIMARY KEY NOT NULL, drops_needed_to_unlock INT, unlocked BOOLEAN, badge_id INT, position INT, created_at TIMESTAMP)",
+            "CREATE TABLE IF NOT EXISTS Levels (id INTEGER PRIMARY KEY NOT NULL, name VARCHAR(100), image_path VARCHAR(30), unlocked BOOLEAN, user_id INT, progress_id INT, achievements_id INT, created_at TIMESTAMP)"
         };
 
-        try
-        {
-            // Open a new database connection
-            IDbConnection insertConnection = new SqliteConnection(conn);
-            insertConnection.Open();
-
-            // Create a command to execute the insert queries
-            IDbCommand insertCommand = insertConnection.CreateCommand();
-
-            foreach (string data in defaultData)
+            try
             {
-                // Create the query
-                string query = $"INSERT INTO Expenses (day, month_letter, year, outward_price, launch_price, return_price, total_expenses) VALUES {data}";
+                // Variable to control if insert default data or not when creating tables first time
+                bool insertData = true;
 
-                insertCommand.CommandText = query;
-                insertCommand.ExecuteNonQuery();
+                foreach (string query in tableQueries)
+                {
+                    string tableName = query.Split(' ')[5];
+
+                    // Check if the table already exists
+                    using (var dbcmd = dbconn.CreateCommand())
+                    {
+                        dbcmd.CommandText = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}'";
+                        using (var reader = dbcmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                Debug.Log("<color=yellow>[INFO] Table " + tableName + " already exists</color>");
+                                insertData = false;
+                            }
+                            else
+                            {
+                                // Table doesn't exist, create it
+                                reader.Close(); // Cerrar el DataReader antes de cambiar el CommandText
+                                dbcmd.CommandText = query;
+                                using (var createReader = dbcmd.ExecuteReader())
+                                {
+                                    Debug.Log("<color=cyan>Table " + tableName + " created successfully!</color>");
+
+                                    int lastIndex = tableQueries.Count - 1;
+                                    // If last table, insert default data
+                                    if (tableQueries.IndexOf(query) == lastIndex && insertData == true)
+                                    {
+                                        // InsertDefaultData();
+                                        Debug.Log("Inserting default data...");
+                                        insertData = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Error when creating tables: " + e.Message);
             }
 
-            // Close the connection
-            insertConnection.Close();
-
-            Debug.Log("<color=cyan>Default data inserted successfully!</color>");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error when inserting default data: " + e.Message);
+            Debug.Log("<color=" + limaColor + ">Closed connection to database!</color>");
         }
     }
 
