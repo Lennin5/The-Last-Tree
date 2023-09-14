@@ -85,9 +85,6 @@ public class InitializeDB : MonoBehaviour
         CreateTables(filePath, deviceType);
     }
 
-
-
-
     private void CreateTables(string filePath, string deviceType)
     {
         // Open db connection
@@ -123,6 +120,7 @@ public class InitializeDB : MonoBehaviour
                         dbcmd.CommandText = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}'";
                         using (var reader = dbcmd.ExecuteReader())
                         {
+                            // If table exists, don't insert default data
                             if (reader.Read())
                             {
                                 Debug.Log("<color=yellow>[INFO] Table " + tableName + " already exists</color>");
@@ -141,7 +139,7 @@ public class InitializeDB : MonoBehaviour
                                     // If last table, insert default data
                                     if (tableQueries.IndexOf(query) == lastIndex && insertData == true)
                                     {
-                                        // InsertDefaultData();
+                                        InsertDefaultData(filePath);
                                         Debug.Log("Inserting default data...");
                                         insertData = false;
                                     }
@@ -155,10 +153,62 @@ public class InitializeDB : MonoBehaviour
             {
                 Debug.Log("Error when creating tables: " + e.Message);
             }
-
+            //Close db connection
+            dbconn.Close();
             Debug.Log("<color=" + limaColor + ">Closed connection to database!</color>");
         }
     }
+
+    private void InsertDefaultData(string filePath)
+    {
+        try
+        {
+            string insertUserQuery, insertBadgesQuery;
+            insertUserQuery = "INSERT INTO Users (language, current_level, completed_levels, completed_tutorial, created_at) VALUES ('es', 0, 0, 0, '2020-01-01 00:00:00')";
+            insertBadgesQuery = "INSERT INTO Badges (name, description, image_path, created_at) VALUES " +
+                "('Bronze', 'Bronze badge', 'Sprites/Bronze', '2020-01-01 00:00:00'), " +
+                "('Silver', 'Silver badge', 'Sprites/Silver', '2020-01-01 00:00:00'), " +
+                "('Gold', 'Gold badge', 'Sprites/Gold', '2020-01-01 00:00:00')";
+
+            // Create a list of commands to execute
+            List<string> commandsToInsert = new List<string>
+        {
+            insertUserQuery,
+            insertBadgesQuery
+        };
+
+            foreach (string command in commandsToInsert)
+            {
+                // Table name extracted from command query
+                string tableName = command.Split(' ')[2];
+
+                string connString = "URI=file:" + filePath;
+                using (var dbconn = new SqliteConnection(connString))
+                {
+                    dbconn.Open();
+
+                    using (dbcmd = dbconn.CreateCommand())
+                    {
+                        dbcmd.CommandText = command;
+                        reader = dbcmd.ExecuteReader();
+                    }
+                }
+
+                Debug.Log("<color=magenta>Default data inserted on table " + tableName + " successfully!</color>");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error when inserting default data: " + e.Message);
+        }
+        finally
+        {
+            // Ensure that the reader and database connection are properly closed
+            reader?.Close();
+            dbconn?.Close();
+        }
+    }
+
 
 
 }
