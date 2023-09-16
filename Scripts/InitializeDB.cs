@@ -164,11 +164,12 @@ public class InitializeDB : MonoBehaviour
         try
         {
             string insertUserQuery, insertBadgesQuery;
-            insertUserQuery = "INSERT INTO Users (language, current_level, completed_levels, completed_tutorial, created_at) VALUES ('es', 0, 0, 0, '2020-01-01 00:00:00')";
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            insertUserQuery = "INSERT INTO Users (language, current_level, completed_levels, completed_tutorial, created_at) VALUES ('es', 0, 0, 0, '" + timestamp + "')";
             insertBadgesQuery = "INSERT INTO Badges (name, description, image_path, created_at) VALUES " +
-                "('Bronze', 'Bronze badge', 'Sprites/Bronze', '2020-01-01 00:00:00'), " +
-                "('Silver', 'Silver badge', 'Sprites/Silver', '2020-01-01 00:00:00'), " +
-                "('Gold', 'Gold badge', 'Sprites/Gold', '2020-01-01 00:00:00')";
+                "('Bronze', 'Bronze badge', 'Sprites/Bronze', '" + timestamp + "'), " +
+                "('Silver', 'Silver badge', 'Sprites/Silver', '" + timestamp + "'), " +
+                "('Gold', 'Gold badge', 'Sprites/Gold', '" + timestamp + "')";
 
             // Create a list of commands to execute
             List<string> commandsToInsert = new List<string>
