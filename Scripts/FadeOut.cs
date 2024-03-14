@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class FadeOut : MonoBehaviour
 {
-    public float fadeDuration = 10f; // Duración de la desaparición gradual
+    public float fadeDuration = 1f; // Duración de la desaparición gradual
     public Image image;
     public Rigidbody2D rb;
 
