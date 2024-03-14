@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class FadeOut : MonoBehaviour
 {
-    public float fadeDuration = 0.2f; // Duración de la desaparición gradual
+    public float fadeDuration = 10f; // Duración de la desaparición gradual
     public Image image;
     public Rigidbody2D rb;
 
@@ -24,7 +24,7 @@ public class FadeOut : MonoBehaviour
 
     IEnumerator StartFadeOutWithDelay()
     {
-        yield return new WaitForSeconds(Random.Range(1f, 5f));
+        yield return new WaitForSeconds(Random.Range(1f, 6f));
         StartCoroutine(FadeOutCoroutine());
     }
 
@@ -38,7 +38,7 @@ public class FadeOut : MonoBehaviour
         Color initialColor = image.color;
         Color targetColor = new Color(initialColor.r, initialColor.g, initialColor.b, 0f); // Alfa = 0
 
-        rb.gravityScale = 10f;
+        rb.gravityScale = Random.Range(10f, 30f);
 
 
         while (elapsedTime < fadeDuration)
@@ -71,7 +71,7 @@ public class FadeOut : MonoBehaviour
         rb.velocity = Vector2.zero;
 
         // Volver a iniciar la desaparición gradual en un lapso de tiempo aleatorio
-        yield return new WaitForSeconds(Random.Range(0.1f, 0.9f));
+        yield return new WaitForSeconds(Random.Range(1f, 3f));
         StartCoroutine(FadeOutCoroutine());
         
     }
