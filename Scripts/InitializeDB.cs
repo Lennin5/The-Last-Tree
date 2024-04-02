@@ -34,7 +34,7 @@ public class InitializeDB : MonoBehaviour
         }
 
         // Add device type to database path (SWITCH BEFORE BUILDING GAME)
-        DeviceType = "Windows";
+        DeviceType = "Android";
 
         // Add the database name
         DatabaseName = "RootsHope.s3db";
